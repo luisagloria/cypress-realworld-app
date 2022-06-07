@@ -1,7 +1,7 @@
 // check this file using TypeScript if available
 // @ts-check
 
-import { faker } from "@faker-js/faker";
+import { faker } from '@faker-js/faker';
 import { User, BankAccount } from "../../../src/models";
 
 const apiBankAccounts = `${Cypress.env("apiUrl")}/bankAccounts`;
@@ -31,15 +31,6 @@ describe("Bank Accounts API", function () {
     });
   });
 
-  context("GET /bankAccounts", function () {
-    it("gets a list of bank accounts for user", function () {
-      const { id: userId } = ctx.authenticatedUser!;
-      cy.request("GET", `${apiBankAccounts}`).then((response) => {
-        expect(response.status).to.eq(200);
-        expect(response.body.results[0].userId).to.eq(userId);
-      });
-    });
-  });
 
   context("GET /bankAccounts/:bankAccountId", function () {
     it("gets a bank account", function () {
@@ -68,6 +59,21 @@ describe("Bank Accounts API", function () {
     });
   });
 
+  context("GET /bankAccounts", function () {
+    it("gets a list of all bank accounts for user", function () {
+      const { id: userId } = ctx.authenticatedUser!;
+      cy.request("GET", `${apiBankAccounts}`).then((response) => {
+        expect(response.status).to.eq(200);
+        for(var i = 0; i < response.body.results.length; i++){
+          cy.log(`_**return values for array ${i}**_`)
+          cy.log(`Bank Name: ${response.body.results[i].bankName}`)
+          cy.log(`Account Number: ${response.body.results[i].accountNumber}`)
+          cy.log(`Routing Number: ${response.body.results[i].routingNumber}`)
+        }
+      });
+    });
+  });
+
   context("DELETE /contacts/:bankAccountId", function () {
     it("deletes a bank account", function () {
       const { id: bankAccountId } = ctx.bankAccounts![0];
@@ -82,7 +88,7 @@ describe("Bank Accounts API", function () {
       const { id: userId } = ctx.authenticatedUser!;
       cy.request("POST", `${apiGraphQL}`, {
         query: `query {
-           listBankAccount {
+          listBankAccount {
             id
             uuid
             userId
@@ -92,7 +98,7 @@ describe("Bank Accounts API", function () {
             isDeleted
             createdAt
             modifiedAt
-           }
+          }
           }`,
       }).then((response) => {
         expect(response.status).to.eq(200);
